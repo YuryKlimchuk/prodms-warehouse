@@ -1,7 +1,5 @@
 package com.hydroyura.prodms.warehouse.server.db.entity;
 
-import java.util.Locale;
-import java.util.Map;
 import lombok.Data;
 import org.bson.types.ObjectId;
 
@@ -13,8 +11,8 @@ public class Material {
     private String number;
     private String groupNumber;
     private Integer type;
-    private Map<Locale, String> name;
-    private Map<Locale, String> groupName;
+    private String name;
+    private String groupName;
     private String size;
     private Integer profile;
     private String standard;

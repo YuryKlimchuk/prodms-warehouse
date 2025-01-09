@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 class MaterialRepositoryTest {
 
@@ -23,6 +24,10 @@ class MaterialRepositoryTest {
     @BeforeAll
     static void startContainer() {
         TEST_MONGO_CONTAINER.setPortBindings(List.of("27020:27017"));
+//        TEST_MONGO_CONTAINER.withCopyFileToContainer(
+//            MountableFile.forClasspathResource("./test.js"),
+//            "/docker-entrypoint-initdb.d/test.js"
+//        );
         TEST_MONGO_CONTAINER.start();
     }
 
@@ -42,6 +47,12 @@ class MaterialRepositoryTest {
     @Test
     void create_ERROR_DUBLICATION() {
         assertFalse(false);
+    }
+
+    @Test
+    void createIndex_OK() throws Exception {
+        materialRepository.createIndexes();
+        var result = TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet", "--eval", "db.warehouse.getIndexes()");
     }
 
 
