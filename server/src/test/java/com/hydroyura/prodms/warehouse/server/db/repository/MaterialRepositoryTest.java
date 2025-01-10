@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.hydroyura.prodms.warehouse.server.db.entity.Material;
+import com.hydroyura.prodms.warehouse.server.model.exception.MaterialUpdateCountException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClients;
 import java.util.ArrayList;
@@ -131,34 +132,78 @@ class MaterialRepositoryTest {
         assertEquals(initCount + delta, currentCount);
     }
 
+    @Test
+    void patchCountCutDownOn_OK() throws Exception {
+        var number = "TEST_NUMBER";
+        double initCount = 10.5d;
+        TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+            "--eval", "use warehouse",
+            "--eval", "db.materials.insertOne({number: '%s', count: Double(%s)})".formatted(number, initCount),
+            "--json=relaxed");
 
+        double delta = -7.2d;
+        materialRepository.patchCount(number, delta);
 
-    /*
-    //TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
-//    "--eval", "use warehouse",
-//    "--eval", "db.materials.insertOne({test: 'test'})");
+        var result = TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+            "--eval", "use warehouse",
+            "--eval", "db.materials.findOne({number: '%s'})".formatted(number),
+            "--json=relaxed");
 
-//TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
-//    "--eval", "use warehouse",
-//    "--eval", "db.materials.deleteMany({test: 'test'})");
+        JavaType type = TypeFactory.defaultInstance().constructMapType(Map.class, String.class, Object.class);
 
-//TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
-//    "--eval", "use warehouse",
-//    "--eval", "db.getCollectionNames()");
+        Map<String, Object> convertedResult = objectMapper.readValue(result.getStdout(), type);
+        double currentCount = Double.parseDouble(convertedResult.get("count").toString());
 
-//TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
-//    "--eval", "db.warehouse.createIndex({'field_super': 1})");
+        assertEquals(initCount + delta, currentCount);
+    }
 
-TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
-    "--eval", "db.warehouse.getIndexes()", "--json");
-     */
+    @Test
+    void patchCount_NOT_EXIST() throws Exception {
+        var number = "TEST_NUMBER";
+        double delta = -7.2d;
 
+        assertThrows(MaterialUpdateCountException.class, () -> materialRepository.patchCount(number, delta));
+    }
 
-//TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
-//    "--eval", "use warehouse",
-//    "--eval", "db.materials.insertOne({test: 'test'})",
-//    "--json");
+    @Test
+    void get_OK() throws Exception {
+        var number = "TEST_NUMBER";
+        var name = "test-name";
+        var size = "10x10x5";
+        var count = 15.7d;
+        TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+            "--eval", "use warehouse",
+            "--eval",
+                """
+                    db.materials.insertOne(
+                        {
+                            number: '%s', groupNumber: 'groupNumber',
+                            type: 1, profile: 1, measureUnit: 1,
+                            count: %s,
+                            name: '%s', groupName: 'test-group-name',
+                            size: '%s', standard: 'ISO 6543'
+                        }
+                    )
+                """.formatted(number, count, name, size),
+            "--json=relaxed");
 
+        var result = materialRepository.get(number);
+
+        assertTrue(result.isPresent()
+            && result.get().getNumber().equals(number)
+            && result.get().getCount().equals(count)
+            && result.get().getName().equals(name)
+            && result.get().getSize().equals(size)
+        );
+    }
+
+    @Test
+    void get_NOT_FOUND() throws Exception {
+        var number = "TEST_NUMBER";;
+        var result = materialRepository.get(number);
+
+        assertTrue(result.isEmpty());
+    }
 
     private Material createMaterial(String number) {
         var material = new Material();

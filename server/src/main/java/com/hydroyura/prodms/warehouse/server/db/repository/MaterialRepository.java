@@ -1,7 +1,10 @@
 package com.hydroyura.prodms.warehouse.server.db.repository;
 
+import static com.hydroyura.prodms.warehouse.server.SharedConstants.EX_MSG_MATERIAL_PATCH_COUNT;
+
 import com.hydroyura.prodms.warehouse.server.db.MongoRepository;
 import com.hydroyura.prodms.warehouse.server.db.entity.Material;
+import com.hydroyura.prodms.warehouse.server.model.exception.MaterialUpdateCountException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -49,7 +52,7 @@ public class MaterialRepository implements MongoRepository<Material> {
 
     public Optional<Material> get(String number) {
         return Optional
-            .ofNullable(getCollection().find(new Document("number", number)).first());
+            .ofNullable(getCollection().find(Filters.eq("number", number)).first());
     }
 
     public Collection<Material> getGroup(String groupNumber) {
@@ -82,6 +85,9 @@ public class MaterialRepository implements MongoRepository<Material> {
 
         UpdateResult result = getCollection().updateOne(filter, updates, options);
 
-        int a = 1;
+        if (result.getMatchedCount() == 0 && result.getModifiedCount() == 0) {
+            throw new MaterialUpdateCountException(EX_MSG_MATERIAL_PATCH_COUNT);
+        }
     }
+
 }

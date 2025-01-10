@@ -1,1 +1,0 @@
-db.sdf.insertOne({"x": 1});
