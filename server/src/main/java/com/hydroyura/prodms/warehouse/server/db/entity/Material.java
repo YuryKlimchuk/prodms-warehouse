@@ -16,7 +16,6 @@ public class Material {
     private String size;
     private Integer profile;
     private String standard;
-    private String manufacturer;
     private Integer measureUnit;
     private Double count;
 
