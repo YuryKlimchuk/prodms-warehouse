@@ -2,7 +2,7 @@ package com.hydroyura.prodms.warehouse.server.controller.swagger;
 
 import com.hydroyura.prodms.warehouse.server.model.api.ApiRes;
 import com.hydroyura.prodms.warehouse.server.model.request.CreateMaterialReq;
-import com.hydroyura.prodms.warehouse.server.model.request.PatchMaterialReq;
+import com.hydroyura.prodms.warehouse.server.model.request.PatchMaterialCountReq;
 import com.hydroyura.prodms.warehouse.server.model.response.GetMaterialRes;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -67,7 +67,7 @@ public interface MaterialDocumentedController {
         @ApiResponse(
             responseCode = "201",
             content = {@Content(schema = @Schema(implementation = ApiResPatchSuccess.class))},
-            description = "Material was patched successful"
+            description = "Material count was patched successful"
         ),
         @ApiResponse(
             responseCode = "400",
@@ -80,7 +80,9 @@ public interface MaterialDocumentedController {
             description = "Material with getting number doesn't exist"
         )
     })
-    ResponseEntity<ApiRes<Void>> patch(@RequestBody PatchMaterialReq req , HttpServletRequest request);
+    ResponseEntity<ApiRes<Void>> patchCount(@PathVariable String number,
+                                       @RequestBody PatchMaterialCountReq req ,
+                                       HttpServletRequest request);
 
     class ApiResPatchSuccess extends ApiRes<Void> {
     }

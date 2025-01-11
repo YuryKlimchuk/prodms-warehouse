@@ -3,8 +3,8 @@ package com.hydroyura.prodms.warehouse.server.model.request;
 import lombok.Data;
 
 @Data
-public class CreateMaterialReq {
+public class PatchMaterialCountReq {
 
-    private String number;
+    private Double deltaCount;
 
 }
