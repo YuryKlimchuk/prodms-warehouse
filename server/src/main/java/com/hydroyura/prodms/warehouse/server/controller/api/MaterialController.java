@@ -50,8 +50,13 @@ public class MaterialController implements MaterialDocumentedController {
     @RequestMapping(method = POST, value = "")
     public ResponseEntity<ApiRes<Void>> create(CreateMaterialReq req, HttpServletRequest request) {
         validationManager.validate(req, CreateMaterialReq.class);
-        materialService.create(req);
-        return buildApiResponseNotContent(request);
+        ApiRes<Void> emptyApiResponse = buildEmptyApiResponse(request);
+        return materialService.create(req)
+            .map(arg -> new ResponseEntity<>(emptyApiResponse, HttpStatus.NO_CONTENT))
+            .orElseGet(() -> {
+               emptyApiResponse.getErrors().add("Number = [%s] already exists".formatted(req.getNumber()));
+               return new ResponseEntity<>(emptyApiResponse, HttpStatus.BAD_REQUEST);
+            });
     }
 
     @Override
@@ -62,7 +67,13 @@ public class MaterialController implements MaterialDocumentedController {
         return buildApiResponseNotContentOrNotFound(result.isPresent(), request, number);
     }
 
+    private static <T> ApiRes<T> buildEmptyApiResponse(HttpServletRequest req) {
+        ApiRes<T> apiResponse = new ApiRes<>();
+        apiResponse.setId(extractRequestUUID(req));
+        apiResponse.setTimestamp(extractRequestTimestamp(req));
 
+        return apiResponse;
+    }
 
     private static <T> ResponseEntity<ApiRes<T>> buildApiResponseOkOrNotFound(Optional<T> data, HttpServletRequest req, Object number) {
         ApiRes<T> apiResponse = new ApiRes<>();

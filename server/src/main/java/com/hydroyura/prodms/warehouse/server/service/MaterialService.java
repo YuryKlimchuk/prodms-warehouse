@@ -1,6 +1,7 @@
 package com.hydroyura.prodms.warehouse.server.service;
 
 import com.hydroyura.prodms.warehouse.server.db.repository.MaterialRepository;
+import com.hydroyura.prodms.warehouse.server.mapper.CreateMaterialReqToMaterialMapper;
 import com.hydroyura.prodms.warehouse.server.mapper.MaterialToGetMaterialResMapper;
 import com.hydroyura.prodms.warehouse.server.model.request.CreateMaterialReq;
 import com.hydroyura.prodms.warehouse.server.model.request.PatchMaterialCountReq;
@@ -15,6 +16,7 @@ public class MaterialService {
 
     private final MaterialRepository materialRepository;
     private final MaterialToGetMaterialResMapper materialToGetMaterialResMapper;
+    private final CreateMaterialReqToMaterialMapper createMaterialReqToMaterialMapper;
 
     public Optional<GetMaterialRes> get(String number) {
         return materialRepository
@@ -27,10 +29,8 @@ public class MaterialService {
         return Optional.empty();
     }
 
-    public void create(CreateMaterialReq req) {
-
-
-
+    public Optional<String> create(CreateMaterialReq req) {
+        return materialRepository.create(createMaterialReqToMaterialMapper.toDestination(req));
     }
 
 }

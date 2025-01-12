@@ -6,11 +6,15 @@ PurchasedItems(покупное не требующие доработки)
 SemiPart(полуфабрикаты)
 
 
-## Materials API
+## Materials 
+### REST API
 * GET /api/v1/materials (pagination & filters) - get list
-* POST /api/v1/materials - create new one
-* GET /api/v1/materials/:id - get detail info about certain material
-* PATCH /api/v1/materials/:id - patch material data
+* GET /api/v1/materials/{number} - get detail info about certain 
+
+### Kafka consume
+* Increase count of material: create/update (Material receipt)
+* Material consumption: reduce count of material (Material consumption)
+
 
 **Material model:**  
 number: text  
@@ -24,6 +28,7 @@ profile: enum
 standard: text  
 measure_unit: enum
 count: Double
+updatedAt: timestamp
 
 
 

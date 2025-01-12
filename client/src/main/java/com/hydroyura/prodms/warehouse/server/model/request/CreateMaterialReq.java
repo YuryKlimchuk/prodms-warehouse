@@ -6,5 +6,14 @@ import lombok.Data;
 public class CreateMaterialReq {
 
     private String number;
+    private String groupNumber;
+    private Integer type;
+    private String name;
+    private String groupName;
+    private String size;
+    private Integer profile;
+    private String standard;
+    private Integer measureUnit;
+    private Double count;
 
 }
