@@ -1,30 +1,62 @@
 package com.hydroyura.prodms.warehouse.server.config;
 
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import com.hydroyura.prodms.warehouse.server.model.event.MaterialConsumption;
+import com.hydroyura.prodms.warehouse.server.model.event.MaterialReceipt;
+import com.hydroyura.prodms.warehouse.server.service.KafkaErrorHandler;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.converter.RecordMessageConverter;
+import org.springframework.kafka.support.converter.StringJsonMessageConverter;
+import org.springframework.kafka.support.mapping.DefaultJackson2JavaTypeMapper;
+import org.springframework.kafka.support.mapping.Jackson2JavaTypeMapper;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Configuration
+//@EnableKafka
 public class KafkaConsumerConfig {
 
     @Bean
-    KafkaConsumer<String, String> kafkaConsumer() {
-        Properties consumerProperties = new Properties();
-        consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9094");
-        consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
-
-        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(consumerProperties);
-
-        kafkaConsumer.subscribe(List.of("material-topic"));
-
-        return kafkaConsumer;
+    public RecordMessageConverter multiTypeConverter() {
+        StringJsonMessageConverter converter = new StringJsonMessageConverter();
+        DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
+        typeMapper.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
+        typeMapper.addTrustedPackages("com.hydroyura.prodms.warehouse.server.model.event");
+        Map<String, Class<?>> mappings = new HashMap<>();
+        mappings.put("consumption", MaterialConsumption.class);
+        mappings.put("receipt", MaterialReceipt.class);
+        typeMapper.setIdClassMapping(mappings);
+        converter.setTypeMapper(typeMapper);
+        return converter;
     }
 
+    @Bean
+    public ConsumerFactory<String, Object> multiTypeConsumerFactory() {
+        HashMap<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
+        RecordMessageConverter converter,
+        ConsumerFactory<String, Object> multiTypeConsumerFactory) {
+
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(multiTypeConsumerFactory());
+        factory.setRecordMessageConverter(converter);
+        //factory.setCommonErrorHandler(new DefaultErrorHandler());
+        factory.setCommonErrorHandler(new KafkaErrorHandler());
+        return factory;
+    }
 }

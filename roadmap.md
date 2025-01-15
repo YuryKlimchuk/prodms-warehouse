@@ -16,6 +16,10 @@ SemiPart(полуфабрикаты)
 * Material consumption: reduce count of material (Material consumption)
 
 
+
+__TypeId__:consumption  	{"number": "test22", "count": 58}
+
+
 **Material model:**  
 number: text  
 type: enum  

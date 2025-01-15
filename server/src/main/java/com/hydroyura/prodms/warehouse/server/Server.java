@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Server {
 
     public static void main(String[] args) {
-        SpringApplication.run(Server.class, args);
+        var context = SpringApplication.run(Server.class, args);
     }
 
 }
