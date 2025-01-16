@@ -15,7 +15,7 @@ SemiPart(полуфабрикаты)
 * Increase count of material: create/update (Material receipt)
 * Material consumption: reduce count of material (Material consumption)
 
-
+docker exec 57213c12499a /bin/bash -c "echo '{"number": "test", "count": 55}' | /bin/kafka-console-producer --topic materials --bootstrap-server PLAINTEXT://localhost:9092"
 
 __TypeId__:consumption  	{"number": "test22", "count": 58}
 

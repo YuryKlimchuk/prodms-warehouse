@@ -1,0 +1,5 @@
+
+
+kafka:
+  topic: ${KAFKA_TOPIC:materials}
+  url: ${KAFKA_URL:localhost:9092}
