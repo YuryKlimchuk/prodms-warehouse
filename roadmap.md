@@ -16,6 +16,8 @@ SemiPart(полуфабрикаты)
 * Material consumption: reduce count of material (Material consumption)
 
 docker exec 57213c12499a /bin/bash -c "echo '{"number": "test", "count": 55}' | /bin/kafka-console-producer --topic materials --bootstrap-server PLAINTEXT://localhost:9092"
+docker exec 9470835a286f /bin/sh -c 'echo "{dffffd: ddd}" | kcat -b kafka:19092 -t test -P'
+
 
 __TypeId__:consumption  	{"number": "test22", "count": 58}
 
