@@ -3,3 +3,15 @@
 kafka:
   topic: ${KAFKA_TOPIC:materials}
   url: ${KAFKA_URL:localhost:9092}
+
+
+mongo:
+  connection:
+    user: ${MONGO_CONNECTION_user:mongo-user}
+    pwd: ${MONGO_CONNECTION_PWD:mongo-pwd}
+    db: ${MONGO_CONNECTION_DB:warehouse}
+    host: ${MONGO_CONNECTION_HOST:localhost}
+    port: ${MONGO_CONNECTION_PORT:27017}
+  collections:
+    materials:
+      name: ${MONGO_COLLECTIONS_MATERIALS_NAME:materials}
