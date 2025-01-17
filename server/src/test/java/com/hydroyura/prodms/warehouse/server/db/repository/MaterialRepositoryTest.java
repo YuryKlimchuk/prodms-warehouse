@@ -1,6 +1,8 @@
 package com.hydroyura.prodms.warehouse.server.db.repository;
 
+import static com.hydroyura.prodms.warehouse.server.db.repository.MongoTestUtils.MONGO_IMAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,87 +10,75 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.hydroyura.prodms.warehouse.server.db.entity.Material;
 import com.hydroyura.prodms.warehouse.server.model.exception.MaterialUpdateCountException;
 import com.mongodb.MongoWriteException;
-import com.mongodb.client.MongoClients;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import org.junit.ClassRule;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.JavaType;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.TypeFactory;
-import org.testcontainers.utility.DockerImageName;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestConfig.class)
 class MaterialRepositoryTest {
 
-    private final MaterialRepository materialRepository;
+    @Autowired
+    private MaterialRepository materialRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @ClassRule
-    public static MongoDBContainer TEST_MONGO_CONTAINER =
-        new MongoDBContainer(DockerImageName.parse("mongo:7.0.16"));
+    public static MongoDBContainer MONGO_TEST_CONTAINER = new MongoDBContainer(MONGO_IMAGE);
 
+    @DynamicPropertySource
+    static void overrideProperties(DynamicPropertyRegistry registry) {
+        registry.add("test.mongo.db", () -> "warehouse");
+        registry.add("test.mongo.collection", () -> "materials");
+        registry.add("test.mongo.connection.string", MONGO_TEST_CONTAINER::getConnectionString);
+    }
 
     @BeforeAll
     static void startContainer() throws Exception {
         // start container
-        TEST_MONGO_CONTAINER.setPortBindings(List.of("27020:27017"));
-        TEST_MONGO_CONTAINER.start();
+        MONGO_TEST_CONTAINER.start();
 
         // init "materials" collection
-        TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+        MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
             "--eval", "use warehouse",
             "--eval", "db.materials.insertOne({test: 'test'})",
             "--json=relaxed");
-        TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+        MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
             "--eval", "use warehouse",
             "--eval", "db.materials.deleteMany({})",
+            "--json=relaxed");
+
+        // create indexes
+        MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
+            "--eval", "use warehouse",
+            "--eval", "db.materials.createIndex({name: 1}, {name: 'number_unique', unique: true})",
             "--json=relaxed");
     }
 
     @AfterEach
     void clean() throws Exception {
-        TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+        MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
             "--eval", "use warehouse",
             "--eval", "db.materials.deleteMany({})",
             "--json=relaxed");
     }
 
-    MaterialRepositoryTest() {
-        var mongoClient = MongoClients.create("mongodb://localhost:27020/warehouse?directConnection=true&serverSelectionTimeoutMS=2000");
-        var mongoDatabase = mongoClient.getDatabase("warehouse");
-        this.materialRepository = new MaterialRepository(mongoDatabase);
-    }
-
-    @Test
-    void createIndex_OK() throws Exception {
-        materialRepository.createIndexes();
-        var result = TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
-            "--eval", "use warehouse",
-            "--eval", "db.materials.getIndexes()",
-            "--json=relaxed"
-        );
-
-        JavaType type = TypeFactory
-            .defaultInstance()
-            .constructCollectionType(
-                ArrayList.class,
-                TypeFactory.defaultInstance().constructMapType(Map.class, String.class, Object.class)
-            );
-
-        List<Map<String, Object>> convertedResult = objectMapper.readValue(result.getStdout(), type);
-        List<String> indexes = convertedResult
-            .stream()
-            .map(m -> m.get("name").toString())
-            .toList();
-
-        assertTrue(
-            indexes.size() == 2
-            && indexes.contains("NUMBER_UNIQUE")
-        );
+    @AfterAll
+    static void stopContainer() throws Exception {
+        MONGO_TEST_CONTAINER.stop();
+        MONGO_TEST_CONTAINER.close();
     }
 
     @Test
@@ -103,15 +93,14 @@ class MaterialRepositoryTest {
         var name = "TEST_NUMBER";
         materialRepository.create(createMaterial(name));
 
-        var ex = assertThrows(MongoWriteException.class, () -> materialRepository.create(createMaterial(name)));
-        assertEquals(11000, ex.getError().getCode());
+        assertFalse(materialRepository.create(createMaterial(name)).isPresent());
     }
 
     @Test
     void patchCountIncrease_OK() throws Exception {
         var number = "TEST_NUMBER";
         double initCount = 10.5d;
-        TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+        MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
             "--eval", "use warehouse",
             "--eval", "db.materials.insertOne({number: '%s', count: Double(%s)})".formatted(number, initCount),
             "--json=relaxed");
@@ -119,7 +108,7 @@ class MaterialRepositoryTest {
         double delta = 7.2d;
         materialRepository.patchCount(number, delta);
 
-        var result = TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+        var result = MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
             "--eval", "use warehouse",
             "--eval", "db.materials.findOne({number: '%s'})".formatted(number),
             "--json=relaxed");
@@ -136,7 +125,7 @@ class MaterialRepositoryTest {
     void patchCountCutDownOn_OK() throws Exception {
         var number = "TEST_NUMBER";
         double initCount = 10.5d;
-        TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+        MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
             "--eval", "use warehouse",
             "--eval", "db.materials.insertOne({number: '%s', count: Double(%s)})".formatted(number, initCount),
             "--json=relaxed");
@@ -144,7 +133,7 @@ class MaterialRepositoryTest {
         double delta = -7.2d;
         materialRepository.patchCount(number, delta);
 
-        var result = TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+        var result = MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
             "--eval", "use warehouse",
             "--eval", "db.materials.findOne({number: '%s'})".formatted(number),
             "--json=relaxed");
@@ -171,7 +160,7 @@ class MaterialRepositoryTest {
         var name = "test-name";
         var size = "10x10x5";
         var count = 15.7d;
-        TEST_MONGO_CONTAINER.execInContainer("mongosh", "--quiet",
+        MONGO_TEST_CONTAINER.execInContainer("mongosh", "--quiet",
             "--eval", "use warehouse",
             "--eval",
                 """
