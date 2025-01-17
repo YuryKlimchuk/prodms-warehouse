@@ -5,6 +5,7 @@ import static com.hydroyura.prodms.warehouse.server.SharedConstants.EX_MSG_MATER
 import com.hydroyura.prodms.warehouse.server.db.MongoRepository;
 import com.hydroyura.prodms.warehouse.server.db.entity.Material;
 import com.hydroyura.prodms.warehouse.server.model.exception.MaterialUpdateCountException;
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -16,7 +17,7 @@ import com.mongodb.client.result.UpdateResult;
 import java.util.Collection;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.bson.Document;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.codecs.ValueCodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -25,6 +26,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
 @RequiredArgsConstructor
+@Slf4j
 public class MaterialRepository implements MongoRepository<Material> {
 
     private final MongoDatabase mongoDatabase;
@@ -46,8 +48,21 @@ public class MaterialRepository implements MongoRepository<Material> {
             .getCollection(getCollectionName(), getType());
     }
 
-    public void create(Material material) {
-        getCollection().insertOne(material);
+    public Optional<String> create(Material material) {
+        try {
+            var result = getCollection().insertOne(material);
+            if (result.wasAcknowledged() && result.getInsertedId() != null) {
+                return Optional.of(result.getInsertedId().asObjectId().toString());
+            }
+            log.warn("Can't insert new material with number = [{}] => unknown problem", material.getNumber());
+        } catch (MongoWriteException ex) {
+            log.warn("Can't insert new material with number = [{}], errMsg = [{}], errorCode = [[{}]",
+                material.getNumber(),
+                ex.getMessage(),
+                ex.getError()
+            );
+        }
+        return Optional.empty();
     }
 
     public Optional<Material> get(String number) {

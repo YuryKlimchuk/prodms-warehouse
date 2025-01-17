@@ -1,0 +1,10 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: materials
+  namespace: prodms
+  labels:
+    strimzi.io/cluster: "prodms-kafka-cluster"
+spec:
+  partitions: 3
+  replicas: 1
