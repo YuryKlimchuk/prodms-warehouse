@@ -16,6 +16,6 @@ public class SharedConstants {
     public static final String REQUEST_URI_KEY = "REQUEST_URI";
 
 
-    public static final String RESPONSE_ERROR_MSG_ENTITY_NOT_FOUND = "Number = [%s] not found";
+    public static final String RESPONSE_ERROR_MSG_MATERIAL_NOT_FOUND = "Material with number = [%s] not found";
 
 }

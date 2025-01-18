@@ -43,3 +43,9 @@ updatedAt: timestamp
 /api/v1/materials  
 /api/v1/purchased-items  
 /api/v1/semi-parts  
+
+
+docker exec 57213c12499a /bin/bash -c "echo '{"number": "test", "count": 55}' | /bin/kafka-console-producer --topic materials --bootstrap-server PLAINTEXT://localhost:9092"
+
+__TypeId__:receipt
+{"number": "Steel-40X_GOST", "groupNumber": "Steel-40X", "type": 1, "name": "Сталь 40Х ГОСТ4543-2016", "groupName": "Сталь 40Х", "size": 22, "profile": 1, "standard": "ГОСТ4543-2016", "measureUnit": 1, "count": 1000}

@@ -34,7 +34,7 @@ public class MaterialRepository {
 
 
     public MaterialRepository(MongoDatabase mongoDatabase,
-                              @Value("${mongo.collection.materials.name}") String collection) {
+                              @Value("${mongo.collections.materials.name}") String collection) {
         this.mongoDatabase = mongoDatabase;
         this.collection = collection;
     }
