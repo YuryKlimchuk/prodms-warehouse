@@ -1,4 +1,4 @@
-package com.hydroyura.prodms.warehouse.server.model.response;
+package com.hydroyura.prodms.warehouse.server.model.response.material;
 
 import lombok.Data;
 

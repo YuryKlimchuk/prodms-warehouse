@@ -8,8 +8,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hydroyura.prodms.warehouse.server.model.exception.ValidationException;
 import com.hydroyura.prodms.warehouse.server.model.request.CreateMaterialReq;
-import com.hydroyura.prodms.warehouse.server.model.request.PatchMaterialCountReq;
-import com.hydroyura.prodms.warehouse.server.model.response.GetMaterialRes;
+import com.hydroyura.prodms.warehouse.server.model.response.material.GetMaterialRes;
 import com.hydroyura.prodms.warehouse.server.service.MaterialService;
 import com.hydroyura.prodms.warehouse.server.validation.ValidationManager;
 import com.hydroyura.prodms.warehouse.server.validation.enums.NumberKey;
@@ -67,7 +66,7 @@ class MaterialControllerTest {
 
     @Test
     void get_BAD_REQUEST() throws Exception {
-        var wrapNumber = new WrapNumber(MATERIAL_NUMBER_1, String.class, NumberKey.MATERIAL);
+        var wrapNumber = new WrapNumber<>(MATERIAL_NUMBER_1, String.class, NumberKey.MATERIAL);
         var errors = new SimpleErrors(wrapNumber);
         Mockito
             .doThrow(new ValidationException(errors, VALIDATION_ERR_MSG))
@@ -82,90 +81,13 @@ class MaterialControllerTest {
     }
 
     @Test
-    void create_OK() throws Exception {
-        var req = new CreateMaterialReq();
-        req.setNumber(MATERIAL_NUMBER_1);
-
-        Mockito
-            .doNothing()
-            .when(materialService)
-            .create(req);
-
-        mockMvc
-            .perform(MockMvcRequestBuilders
-                .post(URL_MATERIAL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(MockMvcResultMatchers.status().isNoContent());
+    void getAll_OK() throws Exception {
+        throw new RuntimeException();
     }
 
     @Test
-    void create_BAD_REQUEST() throws Exception {
-        var req = new CreateMaterialReq();
-        req.setNumber(MATERIAL_NUMBER_1);
-
-        var errors = new SimpleErrors(req);
-
-        Mockito
-            .doThrow(new ValidationException(errors, VALIDATION_ERR_MSG))
-            .when(validationManager)
-            .validate(req, CreateMaterialReq.class);
-
-        mockMvc
-            .perform(MockMvcRequestBuilders
-                .post(URL_MATERIAL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
-
-    @Test
-    void patch_OK() throws Exception {
-        var req = new PatchMaterialCountReq();
-        req.setDeltaCount(5.5d);
-        Mockito
-            .when(materialService.patchCount(MATERIAL_NUMBER_1, req))
-            .thenReturn(Optional.of(MATERIAL_NUMBER_1));
-
-        mockMvc
-            .perform(MockMvcRequestBuilders
-                .patch(URL_MATERIAL + "/" + MATERIAL_NUMBER_1  + "/count")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-    @Test
-    void patch_NOT_FOUND() throws Exception {
-        var req = new PatchMaterialCountReq();
-        req.setDeltaCount(5.5d);
-        when(materialService.patchCount(MATERIAL_NUMBER_1, req))
-            .thenReturn(Optional.empty());
-
-        mockMvc
-            .perform(MockMvcRequestBuilders
-                .patch(URL_MATERIAL + "/" + MATERIAL_NUMBER_1 + "/count")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
-
-    @Test
-    void patch_BAD_REQUEST() throws Exception {
-        var req = new PatchMaterialCountReq();
-        req.setDeltaCount(5.5d);
-        var errors = new SimpleErrors(req);
-        Mockito
-            .doThrow(new ValidationException(errors, VALIDATION_ERR_MSG))
-            .when(validationManager)
-            .validate(req, PatchMaterialCountReq.class);
-
-        mockMvc
-            .perform(MockMvcRequestBuilders
-                .patch(URL_MATERIAL + "/" + MATERIAL_NUMBER_1 + "/count")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    void getAll_BAD_REQUEST() throws Exception {
+        throw new RuntimeException();
     }
 
 }

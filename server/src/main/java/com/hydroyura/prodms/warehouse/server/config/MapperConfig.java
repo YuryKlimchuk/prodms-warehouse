@@ -6,7 +6,6 @@ import com.hydroyura.prodms.warehouse.server.mapper.MaterialReceiptToMaterialMap
 import com.hydroyura.prodms.warehouse.server.mapper.MaterialReceiptToMaterialMapperImpl;
 import com.hydroyura.prodms.warehouse.server.mapper.MaterialToGetMaterialResMapper;
 import com.hydroyura.prodms.warehouse.server.mapper.MaterialToGetMaterialResMapperImpl;
-import com.hydroyura.prodms.warehouse.server.model.event.MaterialReceipt;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

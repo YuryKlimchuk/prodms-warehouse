@@ -1,7 +1,6 @@
 package com.hydroyura.prodms.warehouse.server.validation;
 
 
-import com.hydroyura.prodms.warehouse.server.props.ValidationProps;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -17,7 +16,7 @@ public abstract class AbstractValidator<T> implements Validator {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
     @Getter
     protected final Class<T> type;
-    protected final ValidationProps props;
+    protected final Boolean enabled;
 
 
     @Override
@@ -27,7 +26,7 @@ public abstract class AbstractValidator<T> implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
-        if (!props.getEnabled()) {
+        if (!enabled) {
             log.debug(VALIDATION_DISABLED_MSG, this.getClass());
             return;
         }

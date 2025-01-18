@@ -1,6 +1,5 @@
 package com.hydroyura.prodms.warehouse.server.service;
 
-import com.hydroyura.prodms.warehouse.server.db.entity.Material;
 import com.hydroyura.prodms.warehouse.server.db.repository.MaterialRepository;
 import com.hydroyura.prodms.warehouse.server.mapper.CreateMaterialReqToMaterialMapper;
 import com.hydroyura.prodms.warehouse.server.mapper.MaterialReceiptToMaterialMapper;
@@ -8,8 +7,9 @@ import com.hydroyura.prodms.warehouse.server.mapper.MaterialToGetMaterialResMapp
 import com.hydroyura.prodms.warehouse.server.model.event.MaterialConsumption;
 import com.hydroyura.prodms.warehouse.server.model.event.MaterialReceipt;
 import com.hydroyura.prodms.warehouse.server.model.request.CreateMaterialReq;
-import com.hydroyura.prodms.warehouse.server.model.request.PatchMaterialCountReq;
-import com.hydroyura.prodms.warehouse.server.model.response.GetMaterialRes;
+import com.hydroyura.prodms.warehouse.server.model.request.material.GetAllMaterialsReqParams;
+import com.hydroyura.prodms.warehouse.server.model.response.material.GetAllMaterialsRes;
+import com.hydroyura.prodms.warehouse.server.model.response.material.GetMaterialRes;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,13 +29,8 @@ public class MaterialService {
             .map(materialToGetMaterialResMapper::toDestination);
     }
 
-    public Optional<String> patchCount(String number, PatchMaterialCountReq req) {
-        materialRepository.patchCount(number, req.getDeltaCount());
-        return Optional.empty();
-    }
-
-    public Optional<String> create(CreateMaterialReq req) {
-        return materialRepository.create(createMaterialReqToMaterialMapper.toDestination(req));
+    public GetAllMaterialsRes getAll(GetAllMaterialsReqParams params) {
+        return new GetAllMaterialsRes();
     }
 
     public void createUpdate(MaterialReceipt materialReceipt) {

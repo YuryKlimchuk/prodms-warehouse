@@ -2,16 +2,30 @@
 
 kafka:
   topic: ${KAFKA_TOPIC:materials}
-  url: ${KAFKA_URL:localhost:9092}
+  url: ${KAFKA_URL:192.168.49.2:31199}
 
 
 mongo:
   connection:
-    user: ${MONGO_CONNECTION_user:mongo-user}
-    pwd: ${MONGO_CONNECTION_PWD:mongo-pwd}
+    user: ${MONGO_CONNECTION_user:mongodb-user}
+    pwd: ${MONGO_CONNECTION_PWD:mongodb-pwd}
     db: ${MONGO_CONNECTION_DB:warehouse}
     host: ${MONGO_CONNECTION_HOST:localhost}
     port: ${MONGO_CONNECTION_PORT:27017}
   collections:
     materials:
       name: ${MONGO_COLLECTIONS_MATERIALS_NAME:materials}
+
+validation:
+  enabled: ${VALIDATION_ENABLED:true}
+  targets:
+    getAllMaterials:
+      defaults:
+        itemsPerPage: ${VALIDATION_GET_ALL_MATERIALS_ITEMS_PER_PAGE:20}
+        pageNum: ${VALIDATION_GET_ALL_MATERIALS_PAGE_NUM:0}
+        sortCode: ${VALIDATION_GET_ALL_SORT_CODE:0}
+      rules:
+        minItemsPerPage: ${VALIDATION_GET_ALL_MATERIALS_MIN_ITEMS_PER_PAGE:10}
+        minPageNum: ${VALIDATION_GET_ALL_MATERIALS_MIN_PAGE_NUM:0}
+        minSortCode: ${VALIDATION_GET_ALL_MIN_SORT_CODE:0}
+        maxSortCode: ${VALIDATION_GET_ALL_MAX_SORT_CODE:3}
