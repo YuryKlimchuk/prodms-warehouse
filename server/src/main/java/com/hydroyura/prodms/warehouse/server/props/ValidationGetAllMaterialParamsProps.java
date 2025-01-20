@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties(prefix = "validation.targets.getAllMaterials")
+@ConfigurationProperties(prefix = "validation.targets.get-all-materials")
 public class ValidationGetAllMaterialParamsProps {
 
     private Defaults defaults;
