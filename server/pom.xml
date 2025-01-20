@@ -103,7 +103,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.hydroyura.prodms.archive.server.Server</mainClass>
+                    <mainClass>com.hydroyura.prodms.warehouse.server.Server</mainClass>
                     <layout>JAR</layout>
                 </configuration>
             </plugin>
