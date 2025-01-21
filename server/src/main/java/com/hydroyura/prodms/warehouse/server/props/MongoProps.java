@@ -16,9 +16,17 @@ public class MongoProps {
         private String db;
         private String host;
         private Integer port;
+        private String connectionString;
+        /**
+         *  mode = 0 create connection string from peaces: user, pwd, db, host, port
+         *  mode != 0 use prepared connection string
+         */
+        private Integer mode = 0;
 
         public String getConnectionString() {
-            return "mongodb://%s:%s@%s:%s/".formatted(user, pwd, host, port);
+            return (mode == 0)
+                ? "mongodb://%s:%s@%s:%s/%s".formatted(user, pwd, host, port, db)
+                : this.connectionString;
         }
     }
 }
