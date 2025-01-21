@@ -7,7 +7,9 @@ kafka:
 
 mongo:
   connection:
-    user: ${MONGO_CONNECTION_user:mongodb-user}
+    mode: ${MONGO_CONNECTION_MODE}
+    connectionString: ${MONGO_CONNECTION_STRING}
+    user: ${MONGO_CONNECTION_USER:mongodb-user}
     pwd: ${MONGO_CONNECTION_PWD:mongodb-pwd}
     db: ${MONGO_CONNECTION_DB:warehouse}
     host: ${MONGO_CONNECTION_HOST:localhost}
