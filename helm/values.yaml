@@ -1,0 +1,30 @@
+basicEnabled: true
+basic:
+  replicaCount: 1
+  
+  image:
+    repository: "ghcr.io/yuryklimchuk"
+    tag: "prodms/warehouse-server"
+    version: "1.0.0-SNAPSHOT"
+    pullPolicy: Always
+  
+  app:
+    id: "warehouse"
+    port: 8080
+
+  env:
+    valuesFromSecretRef:
+      - name: DB_PWD
+        secretName: prodms-postgres-archive-cluster-app
+        key: password
+
+
+db:
+  url: prodms-postgres-archive-cluster-rw.prodms:5432
+  user: pg-user
+  name: archive
+  entityRootPackage: root-pack-my
+
+microservices:
+  urls:
+    files: http://files-svc.prodms.svc:8080

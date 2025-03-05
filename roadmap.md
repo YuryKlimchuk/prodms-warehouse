@@ -1,3 +1,22 @@
+# Versions descriptions
+## 1.0.0
+### API endpoints
+#### materials
+1. GET /api/v1/materials (pagination & filters) - get list
+2. GET /api/v1/materials/{number} - get detail info about certain
+
+### Kafka consume events
+#### materials
+1. Increase count of material: create/update (Material receipt)
+2. Material consumption: reduce count of material (Material consumption)
+
+
+
+
+
+
+
+### below scratches
 
 # APIs
 
@@ -50,4 +69,10 @@ docker exec 57213c12499a /bin/bash -c "echo '{"number": "test", "count": 55}' | 
 authSource=admin
 
 __TypeId__:receipt
-{"number": "Steel-40X_GOST", "groupNumber": "Steel-40X", "type": 1, "name": "Сталь 40Х ГОСТ4543-2016", "groupName": "Сталь 40Х", "size": 22, "profile": 1, "standard": "ГОСТ4543-2016", "measureUnit": 1, "count": 1000}
+{"number": "Steel-20X_GOST", "groupNumber": "Steel-40X", "type": 1, "name": "Сталь 40Х ГОСТ4543-2016", "groupName": "Сталь 40Х", "size": 22, "profile": 1, "standard": "ГОСТ4543-2016", "measureUnit": 1, "count": 1000}
+
+
+
+mongodb://mongodb-user:mongodb-pwd@prodms-mongodb-0.prodms-mongodb-svc.prodms-infra.svc.cluster.local:27017/warehouse?replicaSet=prodms-mongodb&ssl=false
+mongodb://mongodb-user:mongodb-pwd@prodms-mongodb-0.prodms-mongodb-svc.prodms-infra.svc.cluster.local:27017/admin?replicaSet=prodms-mongodb&ssl=false
+
