@@ -14,17 +14,12 @@ basic:
 
   env:
     valuesFromSecretRef:
-      - name: DB_PWD
-        secretName: prodms-postgres-archive-cluster-app
-        key: password
+      - name: MONGO_CONNECTION_STRING
+        secretName: prodms-mongodb-admin-mongodb-user
+        key: connectionString.standard
 
-
-db:
-  url: prodms-postgres-archive-cluster-rw.prodms:5432
-  user: pg-user
-  name: archive
-  entityRootPackage: root-pack-my
-
-microservices:
-  urls:
-    files: http://files-svc.prodms.svc:8080
+kafka:
+  url: "prodms-kafka-cluster-kafka-bootstrap.prodms-infra:9092"
+mongo:
+  connection:
+    mode: 15
